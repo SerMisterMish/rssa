@@ -146,6 +146,32 @@ wcor <- function(x, ...) {
   }
 }
 
+.hweights.tssa <- function(x, ...) {
+  w <- .get(x, "weights")
+  
+  if (!is.null(w)) {
+    w
+  } else {
+    modes <- .traj.dim(x)
+    modes <- modes[modes > 1]
+    if (length(modes) == 0) return(0)
+    
+    w <- rep(1, modes[1])
+    
+    for (L in modes[-1]) {
+      cs <- c(0, cumsum(w))
+      n <- length(w) + L - 1
+      
+      upper <- cs[pmin(seq_len(n) + 1, length(cs))]
+      lower <- cs[pmax(seq_len(n) - L + 1, 1)]
+      
+      w <- upper - lower
+    }
+  }
+  
+  w
+}
+
 wnorm.default <- wnorm.complex <- function(x, L = (N + 1) %/% 2, ...) {
   N <- length(x)
 
@@ -156,7 +182,7 @@ wnorm.default <- wnorm.complex <- function(x, L = (N + 1) %/% 2, ...) {
   sqrt(sum(w * abs(x)^2))
 }
 
-wnorm.nd.ssa <- wnorm.1d.ssa <- wnorm.toeplitz.ssa <- wnorm.cssa <- wnorm.mssa <- function(x, ...) {
+wnorm.nd.ssa <- wnorm.1d.ssa <- wnorm.toeplitz.ssa <- wnorm.cssa <- wnorm.mssa <- wnorm.tssa <- function(x, ...) {
   # Compute weights
   w <- .hweights(x)
 

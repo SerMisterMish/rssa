@@ -63,10 +63,11 @@ ssa <- function(x,
                 column.projector = "none", row.projector = "none",
                 column.oblique = "identity", row.oblique = "identity",
                 ...,
-                kind = c("1d-ssa", "2d-ssa", "nd-ssa", "toeplitz-ssa", "mssa", "cssa"),
+                kind = c("1d-ssa", "2d-ssa", "nd-ssa", "toeplitz-ssa", "mssa", "cssa", "tssa"),
                 circular = FALSE,
                 svd.method = c("auto", "nutrlan", "propack", "svd", "eigen", "rspectra", "primme", "irlba", "rsvd"),
-                force.decompose = TRUE) {
+                force.decompose = TRUE,
+                tensor.decomposition = c("hutd", "hutd+hooi", "hosvd", "hooi")) {
   svd.method <- match.arg(svd.method)
 
   # Squeeze the attributes
@@ -90,6 +91,8 @@ ssa <- function(x,
       kind <- "2d-ssa"
     else if (is.array(x))
       kind <- "nd-ssa"
+    else if (length(L) > 1)
+      kind <- "tssa"
     else
       kind <- "1d-ssa"
   }
@@ -109,16 +112,21 @@ ssa <- function(x,
     ## Nothing special here (yet!)
   } else if (identical(kind, "cssa")) {
     ## Nothing special here (yet!)
+  } else if (identical(kind, "tssa")) {
+    tensor.decomposition <- match.arg(tensor.decomposition)
   } else {
     N <- -1;
     fmask <- NULL
     stop("invalid SSA kind")
   }
+  
+  if (!identical(kind, "tssa"))
+    tensor.decomposition <- NULL
 
   if (!identical(column.projector, "none") || !identical(row.projector, "none")) {
     # Add `pssa` class if appropriate implementation exists
 
-    if (!any(kind %in% c("1d-ssa", "2d-ssa", "nd-ssa"))) {
+    if (!any(kind %in% c("1d-ssa", "2d-ssa", "nd-ssa", "tssa"))) {
       stop("SSA with projection is not implemented for such SSA kind yet")
     }
 
@@ -128,7 +136,7 @@ ssa <- function(x,
   if (!identical(column.oblique, "identity") || !identical(row.oblique, "identity")) {
     # Add `wossa` class if appropriate implementation exists
 
-    if (!any(kind %in% c("1d-ssa", "2d-ssa", "nd-ssa", "pssa"))) {
+    if (!any(kind %in% c("1d-ssa", "2d-ssa", "nd-ssa", "pssa", "tssa"))) {
       stop("SSA with weights is not implemented for such SSA kind yet")
     }
 
@@ -156,7 +164,8 @@ ssa <- function(x,
                    "wmask", "fmask", "weights", "circular",
                    "Fattr", "Fclass", "Iattr",
                    "column.projector", "row.projector",
-                   "column.oblique", "row.oblique")
+                   "column.oblique", "row.oblique",
+                   "tensor.decomposition")
 
   # Make this S3 object
   class(this) <- c(kind, "ssa")
@@ -196,7 +205,10 @@ ssa <- function(x,
   ## Store oblique matrices
   .set(this, "column.oblique", column.oblique)
   .set(this, "row.oblique", row.oblique)
-
+  
+  ## Store tensor decomposition for 'tssa' kind
+  .set(this, "tensor.decomposition", tensor.decomposition)
+  
   # If 'neig' is specified, then we need to decompose
   if (!is.null(neig) && !force.decompose) {
     warning("`force.decompose = FALSE` is ignored because number of eigentriples is specified")
@@ -412,11 +424,20 @@ residuals.ssa.reconstruction <- function(object, ...) {
 }
 
 nu <- function(x) {
-  res <- ncol(.U(x))
-  ifelse(is.null(res), 0, res)
+  U <- .U(x)
+  if (is(x, "tssa")) 
+    res <- sapply(U, dim)[2, ]
+  else {
+    res <- ncol(U)
+    res <- ifelse(is.null(res), 0, res)
+  }
+  
+  res
 }
 
 nv <- function(x) {
+  if (is(x, "tssa"))
+    return(0)
   res <- ncol(.V(x))
   ifelse(is.null(res), 0, res)
 }
@@ -427,11 +448,22 @@ nlambda <- function(x) {
 }
 
 nsigma <- function(x) {
-  length(.sigma(x))
+  if (is(x, "tssa")) sapply(.sigma(x), length) else length(.sigma(x))
 }
 
-contributions <- function(x, idx = 1:nsigma(x)) {
-  .sigma(x)[idx]^2 / wnorm(x)^2
+contributions <- function(x, idx = if (!is(x, "tssa")) 1:nsigma(x) else sapply(nsigma(x), seq_len)) {
+  if (is(x, "tssa")) {
+    num_modes <- length(.traj.dim(x))
+    if (!is.list(idx)) idx <- rep(list(idx), num_modes)
+    sigma <- .sigma(x)
+    wn2 <- wnorm(x)^2
+    res <- lapply(seq_len(num_modes), \(m) sigma[[m]][idx[[m]]]^2 / wn2)
+  } else {
+    idx <- as.vector(idx)
+    res <- .sigma(x)[idx]^2 / wnorm(x)^2
+  }
+  
+  res
 }
 
 is.shaped <- function(x) {

@@ -117,8 +117,8 @@
 .get.series <- function(x, index) {
   name <- paste("series:", index[1], sep = "")
   F <- .get(x, name)
-  for (i in index[-1]) {
-    name <- paste("series:", i, sep = "")
+  for (i in seq_along(index[-1])) {
+    name <- paste("series:", index[i + 1], sep = "")
     F <- F + .get(x, name)
   }
   F

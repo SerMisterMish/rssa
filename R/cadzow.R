@@ -43,7 +43,7 @@
   UseMethod(".inner.fmt.conversion")
 
 .inner.fmt.conversion.ssa <- function(x, ...)
-  identical
+  identity
 
 .inner.fmt.conversion.1d.ssa <- .inner.fmt.conversion.toeplitz.ssa <- function(x, ...)
   as.numeric

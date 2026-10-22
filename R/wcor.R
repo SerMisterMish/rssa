@@ -60,7 +60,7 @@ wcor.ssa <- function(x, groups, Fs, ..., cache = TRUE) {
 
   if (missing(Fs)) {
     if (missing(groups))
-      groups <- as.list(1:nsigma(x))
+      groups <- as.list(1:min(nsigma(x)))
 
     # Compute reconstruction.
     Fs <- reconstruct(x, groups = groups, ..., cache = cache)

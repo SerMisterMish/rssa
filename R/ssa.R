@@ -91,7 +91,7 @@ ssa <- function(x,
       kind <- "2d-ssa"
     else if (is.array(x))
       kind <- "nd-ssa"
-    else if (length(L) > 1)
+    else if (!missing(L) && length(L) > 1)
       kind <- "tssa"
     else
       kind <- "1d-ssa"
@@ -425,7 +425,7 @@ residuals.ssa.reconstruction <- function(object, ...) {
 
 nu <- function(x) {
   U <- .U(x)
-  if (is(x, "tssa")) 
+  if (inherits(x, "tssa")) 
     res <- sapply(U, dim)[2, ]
   else {
     res <- ncol(U)
@@ -436,7 +436,7 @@ nu <- function(x) {
 }
 
 nv <- function(x) {
-  if (is(x, "tssa"))
+  if (inherits(x, "tssa"))
     return(0)
   res <- ncol(.V(x))
   ifelse(is.null(res), 0, res)
@@ -448,23 +448,14 @@ nlambda <- function(x) {
 }
 
 nsigma <- function(x) {
-  if (is(x, "tssa")) sapply(.sigma(x), length) else length(.sigma(x))
+  if (inherits(x, "tssa")) sapply(.sigma(x), length) else length(.sigma(x))
 }
 
-contributions <- function(x, idx = if (!is(x, "tssa")) 1:nsigma(x) else sapply(nsigma(x), seq_len)) {
-  if (is(x, "tssa")) {
-    num_modes <- length(.traj.dim(x))
-    if (!is.list(idx)) idx <- rep(list(idx), num_modes)
-    sigma <- .sigma(x)
-    wn2 <- wnorm(x)^2
-    res <- lapply(seq_len(num_modes), \(m) sigma[[m]][idx[[m]]]^2 / wn2)
-  } else {
-    idx <- as.vector(idx)
-    res <- .sigma(x)[idx]^2 / wnorm(x)^2
-  }
-  
-  res
-}
+contributions <- function(x, ...)
+  UseMethod("contributions")
+
+contributions.ssa <- function(x, idx = 1:nsigma(x))
+  .sigma(x)[idx]^2 / wnorm(x)^2
 
 is.shaped <- function(x) {
   ## Easy case: non-null masks in case of non-mssa

@@ -91,7 +91,10 @@ panel.factorvectors <- function(x, y, ssaobj, ..., ref = FALSE) {
   modifyList(dots, x)
 }
 
-.plot.ssa.values <- function(x, ..., numvalues, plot.type = "b") {
+.plot.ssa.values <- function(x, ...)
+  UseMethod(".plot.ssa.values")
+
+.plot.ssa.values.ssa <- function(x, ..., numvalues, plot.type = "b") {
   dots <- list(...)
 
   # FIXME: check for proper lengths
@@ -111,7 +114,10 @@ panel.factorvectors <- function(x, y, ssaobj, ..., ref = FALSE) {
           c(list(x = B ~ A , data = d, ssaobj = x), dots))
 }
 
-.contribution <- function(x, idx, ...) {
+.contribution <- function(x, ...) 
+  UseMethod(".contribution")
+
+.contribution.ssa <- function(x, idx, ...) {
   ## Check for F-orthogonality
   isfcor <- .is.frobenius.orthogonal(x, idx, ...)
   if (!isTRUE(isfcor))
@@ -162,7 +168,10 @@ panel.factorvectors <- function(x, y, ssaobj, ..., ref = FALSE) {
 .plot.ssa.vectors.toeplitz.ssa <- `.plot.ssa.vectors.1d.ssa`
 .plot.ssa.vectors.cssa <- `.plot.ssa.vectors.1d.ssa`
 
-.plot.ssa.paired <- function(x, ...,
+.plot.ssa.paired <- function(x, ...)
+  UseMethod(".plot.ssa.paired")
+
+.plot.ssa.paired.ssa <- function(x, ...,
                              what = c("eigen", "factor"),
                              plot.contrib, idx, idy, plot.type = "l") {
   dots <- list(...)
@@ -324,7 +333,8 @@ plot.ssa <- function(x,
                      idy,
                      groups) {
   type <- match.arg(type)
-  vectors <- match.arg(vectors)
+  if (!inherits(x, "tssa"))
+    vectors <- match.arg(vectors)
 
   if (identical(type, "values")) {
     .plot.ssa.values(x, ..., numvalues = numvalues)
@@ -333,6 +343,9 @@ plot.ssa <- function(x,
   } else if (identical(type, "paired")) {
     if (missing(idy))
       idy <- idx + 1
+    
+    oob <- pmax(idy, idx) > min(nsigma(x))
+    idx <- idx[!oob]; idy <- idy[!oob]
 
     .plot.ssa.paired(x, ..., what = vectors, plot.contrib = plot.contrib, idx = idx, idy = idy)
   } else if (identical(type, "series")) {
@@ -409,7 +422,7 @@ plot.1d.ssa.reconstruction <- function(x, ...,
     stop("Unknown plot method")
 }
 
-plot.toeplitz.ssa.reconstruction <- `plot.1d.ssa.reconstruction`
+plot.toeplitz.ssa.reconstruction <- plot.tssa.reconstruction <- `plot.1d.ssa.reconstruction`
 
 prepanel.roots <- function(x, y, ...) {
   lim <- range(x, y, -x, -y, 1, -1)

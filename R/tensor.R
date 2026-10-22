@@ -1,5 +1,5 @@
 #   R package for Singular Spectrum Analysis
-#   Copyright (c) 2013 Anton Korobeynikov <anton at korobeynikov dot info>
+#   Copyright (c) 2026 Nikita Khromov <hromovn0@gmail.com>
 #
 #   This program is free software; you can redistribute it
 #   and/or modify it under the terms of the GNU General Public
@@ -16,6 +16,7 @@
 #   License along with this program; if not, write to the
 #   Free Software Foundation, Inc., 675 Mass Ave, Cambridge,
 #   MA 02139, USA.
+
 
 n.unfold <- function(tens, n) {
   if (length(n) != 1)
@@ -181,10 +182,12 @@ hosvd <- function(tens,
       !requireNamespace("PRIMME", quietly = TRUE))
     stop("PRIMME package is required for SVD method `primme'")
   
-  stopifnot(is(tens, "tensor") && is(unfolds, "unfoldings"))
+  stopifnot(inherits(tens, "tensor") && inherits(unfolds, "unfoldings"))
   
   if (all(abs(tens) < sqrt(.Machine$double.eps)))
     stop("Zero tensor detected")
+  
+  status <- status && require("utils")
   
   modes <- dim(tens)
   num_modes <- length(modes)
@@ -202,7 +205,7 @@ hosvd <- function(tens,
 
   
   if (status)
-    pb <- txtProgressBar(min = 0, max = num_modes, style = 3)
+    pb <- utils::txtProgressBar(min = 0, max = num_modes, style = 3)
   U_list <- vector("list", num_modes)
   for (m in 1:num_modes) {
     R <- unfolds$Re[[m]]
@@ -279,7 +282,7 @@ hosvd <- function(tens,
       stop("Unsupported svd method")
     
     if (status)
-      setTxtProgressBar(pb, m)
+      utils::setTxtProgressBar(pb, m)
   }
   if (status)
     close(pb)
@@ -322,10 +325,12 @@ hooi <- function(tens,
       !requireNamespace("PRIMME", quietly = TRUE))
     stop("PRIMME package is required for SVD method `primme'")
   
-  stopifnot(is(tens, "tensor") && is(unfolds, "unfoldings"))
+  stopifnot(inherits(tens, "tensor") && inherits(unfolds, "unfoldings"))
   
   if (all(abs(tens) < sqrt(.Machine$double.eps)))
     stop("Zero tensor detected")
+  
+  status <- status && require("utils")
   
   modes <- dim(tens)
   num_modes <- length(modes)
@@ -346,7 +351,7 @@ hooi <- function(tens,
     else
       I <- NULL
     
-    if (identical(svd.method, "svd") || identical(method, "eigen")) {
+    if (identical(svd.method, "svd") || identical(svd.method, "eigen")) {
       if (is.null(I)) {
         unfold <- as.matrix(R)
       } else {
@@ -429,7 +434,7 @@ hooi <- function(tens,
   }
   
   if (status)
-    pb <- txtProgressBar(min = 0, max = max_iter, style = 3)
+    pb <- utils::txtProgressBar(min = 0, max = max_iter, style = 3)
   
   while ((curr_iter < max_iter) && (!converged)) {
     for (m in modes_seq) {
@@ -448,11 +453,11 @@ hooi <- function(tens,
     if (CHECK_CONV(Z, U_list)) {
       converged <- TRUE
       if (status)
-        setTxtProgressBar(pb, max_iter)
+        utils::setTxtProgressBar(pb, max_iter)
     }
     else {
       if (status)
-        setTxtProgressBar(pb, curr_iter)
+        utils::setTxtProgressBar(pb, curr_iter)
       curr_iter <- curr_iter + 1
     }
   }
@@ -460,8 +465,8 @@ hooi <- function(tens,
     close(pb)
   
   fnorm_resid <- fnorm_resid[fnorm_resid != 0]
-  norm_percent <- (1 - (tail(fnorm_resid, 1) / tens_norm)) * 100
-  est <- n.mode.prod.list(Z, U_list, ms = 1:num_modes)
+  norm_percent <- (1 - fnorm_resid[length(fnorm_resid)] / tens_norm) * 100
+  est <- n.mode.prod.list(Z, U_list, 1:num_modes)
   invisible(
     list(
       Z = Z,

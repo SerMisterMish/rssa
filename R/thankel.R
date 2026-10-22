@@ -1,5 +1,5 @@
 #   R package for Singular Spectrum Analysis
-#   Copyright (c) 2013 Anton Korobeynikov <anton at korobeynikov dot info>
+#   Copyright (c) 2026 Nikita Khromov <hromovn0@gmail.com>
 #
 #   This program is free software; you can redistribute it
 #   and/or modify it under the terms of the GNU General Public
@@ -16,6 +16,7 @@
 #   License along with this program; if not, write to the
 #   Free Software Foundation, Inc., 675 Mass Ave, Cambridge,
 #   MA 02139, USA.
+
 
 .traj.dim.tssa <- function(x) {
   c(x$window, x$length - sum(x$window) + length(x$window))
@@ -230,6 +231,12 @@ reconstruct.tssa <- function(x, groups, ...,
   if (complex_result) res else Re(res)
 }
 
+calc.v.tssa <- function(x, ...) {
+  warning("This function shouldn't be called for Tensor SSA as eigenvectors for ",
+          "every mode are calculated during the decomposition step")
+  x
+}
+
 .init.fragment.tssa <- function(this)
   expression({
     if (any(circular))
@@ -245,6 +252,16 @@ reconstruct.tssa <- function(x, groups, ...,
     
     column.projector <- row.projector <- NULL
   })
+
+
+contributions.tssa <- function(x, idx = sapply(nsigma(x), seq_len)) {
+  num_modes <- length(.traj.dim(x))
+  if (!is.list(idx)) idx <- rep(list(idx), num_modes)
+  sigma <- .sigma(x)
+  wn2 <- wnorm(x)^2
+  
+  lapply(seq_len(num_modes), \(m) sigma[[m]][idx[[m]]]^2 / wn2)
+}
 
 .colspan.tssa <- function(x, idx, modes = NULL) {
   U <- .U(x)

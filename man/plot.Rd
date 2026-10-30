@@ -23,7 +23,8 @@
   \item{type}{Type of the plot (see 'Details' for more information)}
   \item{\dots}{Arguments to be passed to methods, such as graphical
     parameters}
-  \item{vectors}{For type = 'vectors', choose the vectors to plot}
+  \item{vectors}{For type = 'vectors', choose the vectors to plot. If `x$kind`
+  is "tssa" then vector of modes to plot eigenvectors of should be provided}
   \item{plot.contrib}{logical. If 'TRUE' (the default), the contribution
     of the component to the total variance is plotted.
     For `ossa' class, Frobenius orthogonality checking of elementary matrices is performed.
@@ -130,5 +131,20 @@ plot(ss, type = "vectors", vectors = "factor", idx = 1:12, slice = list(k = 3),
 plot(ss, type = "series", groups = 1:12, slice = list(k = 1))
 plot(ss, type = "series", groups = 1:12, slice = list(k = 1, i = 1))
 plot(ss, plot.method = "xyplot", type = "series", groups = 1:12, slice = list(k = 1, i = 1))
+
+# TSSA example
+st <- ssa(co2, L = c(234, 117))
+# Plot the eigenvalues
+plot(st, type = "values")
+# Plot the paired plot for first 6 eigenvectors, returns a list with plots for each mode
+plot(st, type = "paired", idx = 1:6)
+# Plot eigenvectors for first 6 components, returns a list with plots for each mode
+plot(st, type = "vectors", idx = 1:6)
+# Plot only 1- and 2-mode eigenvectors for first 6 components
+plot(st, type = "vectors", vectors = c(1, 2), idx = 1:6)
+# Plot the first 4 reconstructed components
+plot(st, type = "series", groups = list(1:4))
+# Plot the eigenvalues by points only
+plot(st, type = "values", plot.type = "p")
 }
 }

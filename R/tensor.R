@@ -139,7 +139,7 @@ n.mode.prod.list <- function(tens, mats, modes) {
     grouped_mats <- split(duplicated_mode_mats, factor_dmodes)
     
     pre_multiplied_mats <- unname(lapply(grouped_mats, function(m) 
-      Reduce(\(m1, m2) m2 %*% m1, m)))
+      Reduce(function(m1, m2) m2 %*% m1, m)))
     
     mats <- c(mats[!has_duplicate], pre_multiplied_mats)
     modes <- c(modes[!has_duplicate], unique_dmodes)
@@ -171,7 +171,7 @@ hosvd <- function(tens,
                   ranks = NULL,
                   svd.method = c("svd", "eigen", "primme"),
                   ...,
-                  status = FALSE,
+                  report.progress = FALSE,
                   calc.est = FALSE)
 {
   if (sum(ranks <= 0) != 0)
@@ -186,8 +186,6 @@ hosvd <- function(tens,
   
   if (all(abs(tens) < sqrt(.Machine$double.eps)))
     stop("Zero tensor detected")
-  
-  status <- status && require("utils")
   
   modes <- dim(tens)
   num_modes <- length(modes)
@@ -204,7 +202,7 @@ hosvd <- function(tens,
   }
 
   
-  if (status)
+  if (report.progress)
     pb <- utils::txtProgressBar(min = 0, max = num_modes, style = 3)
   U_list <- vector("list", num_modes)
   for (m in 1:num_modes) {
@@ -225,7 +223,7 @@ hosvd <- function(tens,
       if (identical(svd.method, "svd"))
         U_list[[m]] <- svd(unfold, nu = min(ranks[m], ncol(unfold)))$u
       else
-        U_list[[m]] <- eigen(tcrossprod(unfold), symmetric = TRUE)$vectors[, 1:min(ranks[m], ncol(unfold)), drop = FALSE]
+        U_list[[m]] <- eigen(tcrossprod(unfold, Conj(unfold)), symmetric = TRUE)$vectors[, 1:min(ranks[m], ncol(unfold)), drop = FALSE]
       
     } else if (identical(svd.method, "primme")) {
       matmul <- function(x, y) {
@@ -281,13 +279,13 @@ hosvd <- function(tens,
     } else
       stop("Unsupported svd method")
     
-    if (status)
+    if (report.progress)
       utils::setTxtProgressBar(pb, m)
   }
-  if (status)
+  if (report.progress)
     close(pb)
   
-  Z <- n.mode.prod.list(tens, lapply(U_list, (\(.) Conj(t(.)))), seq_len(num_modes))
+  Z <- n.mode.prod.list(tens, lapply(U_list, (function(x) Conj(t(x)))), seq_len(num_modes))
   
   if (calc.est) {
     est <- n.mode.prod.list(Z, U_list, seq_len(num_modes))
@@ -315,7 +313,7 @@ hooi <- function(tens,
                  max_iter = 25,
                  tol = 1e-05,
                  ...,
-                 status = FALSE)
+                 report.progress = FALSE)
 {
   if (sum(ranks <= 0) != 0)
     stop("ranks must be positive")
@@ -329,8 +327,6 @@ hooi <- function(tens,
   
   if (all(abs(tens) < sqrt(.Machine$double.eps)))
     stop("Zero tensor detected")
-  
-  status <- status && require("utils")
   
   modes <- dim(tens)
   num_modes <- length(modes)
@@ -361,7 +357,7 @@ hooi <- function(tens,
       if (identical(svd.method, "svd"))
         U_list[[m]] <- svd(unfold, nu = min(ranks[m],  ncol(unfold)))$u
       else 
-        U_list[[m]] <- eigen(tcrossprod(unfold), symmetric = TRUE)$vectors[, 1:min(ranks[m], ncol(unfold)), drop = FALSE]
+        U_list[[m]] <- eigen(tcrossprod(unfold, Conj(unfold)), symmetric = TRUE)$vectors[, 1:min(ranks[m], ncol(unfold)), drop = FALSE]
       
     } else if (identical(svd.method, "primme")) {
       matmul <- function(x, y) {
@@ -433,35 +429,35 @@ hooi <- function(tens,
       return(FALSE)
   }
   
-  if (status)
+  if (report.progress)
     pb <- utils::txtProgressBar(min = 0, max = max_iter, style = 3)
   
   while ((curr_iter < max_iter) && (!converged)) {
     for (m in modes_seq) {
-      X <- n.mode.prod.list(tens, lapply(U_list[-m], (\(.) Conj(t(.)))), modes_seq[-m])
+      X <- n.mode.prod.list(tens, lapply(U_list[-m], (function(x) Conj(t(x)))), modes_seq[-m])
       
       # TODO: Change this part so it uses primme if svd.method = "primme"
       unfold <- n.unfold(X, m)
       if (identical(svd.method, "svd"))
         U_list[[m]] <- svd(unfold, nu = ranks[m])$u
       else if (identical(svd.method, "eigen") || identical(svd.method, "primme"))
-        U_list[[m]] <- eigen(tcrossprod(unfold), symmetric = TRUE)$vectors[, 1:min(ranks[m], ncol(unfold)), drop = FALSE]
+        U_list[[m]] <- eigen(tcrossprod(unfold, Conj(unfold)), symmetric = TRUE)$vectors[, 1:min(ranks[m], ncol(unfold)), drop = FALSE]
     }
     
     Z <- n.mode.prod(X, Conj(t(U_list[[num_modes]])), num_modes)
     
     if (CHECK_CONV(Z, U_list)) {
       converged <- TRUE
-      if (status)
+      if (report.progress)
         utils::setTxtProgressBar(pb, max_iter)
     }
     else {
-      if (status)
+      if (report.progress)
         utils::setTxtProgressBar(pb, curr_iter)
       curr_iter <- curr_iter + 1
     }
   }
-  if (status)
+  if (report.progress)
     close(pb)
   
   fnorm_resid <- fnorm_resid[fnorm_resid != 0]

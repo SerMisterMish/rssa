@@ -451,9 +451,6 @@ nsigma <- function(x) {
   if (inherits(x, "tssa")) sapply(.sigma(x), length) else length(.sigma(x))
 }
 
-contributions <- function(x, ...)
-  UseMethod("contributions")
-
 contributions.ssa <- function(x, idx = 1:nsigma(x))
   .sigma(x)[idx]^2 / wnorm(x)^2
 

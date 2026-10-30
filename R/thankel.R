@@ -29,7 +29,7 @@ new.trajtens <- function(F, L) {
   stopifnot(is.numeric(L) && n > 2)
   N <- length(F)
   
-  idx <- Reduce(\(l, k) outer(l, 1:L[k], `+`), 3:n, outer(1:L[1], 1:L[2], `+`)) - n + 1
+  idx <- Reduce(function(l, k) outer(l, 1:L[k], `+`), 3:n, outer(1:L[1], 1:L[2], `+`)) - n + 1
   X <- F[idx]
   dim(X) <- dim(idx)
   class(X) <- "tensor"
@@ -48,7 +48,7 @@ new.unfolds <- function(F, L, rm.repeated = TRUE) {
     hn <- hankel(F, Lsum - 1)
     hlast <- hankel(F, sum(L[-(n - 1)]) - 1)
     
-    unfolds_r <- lapply(L[-n], \(l) Rssa::new.hbhmat(Re(hn), c(l, 1)))
+    unfolds_r <- lapply(L[-n], function(l) Rssa::new.hbhmat(Re(hn), c(l, 1)))
     unfolds_r[[n]] <- Rssa::new.hbhmat(Re(hlast), c(L[n], 1))
   } else {
     unfolds_r <- lapply(L, FUN = Rssa::new.hmat, F = Re(F))
@@ -58,7 +58,7 @@ new.unfolds <- function(F, L, rm.repeated = TRUE) {
     unfolds_i <- list()
     
     if (!rm.repeated) {
-      unfolds_i <- lapply(L[-n], \(l) Rssa::new.hbhmat(Im(hn), c(l, 1)))
+      unfolds_i <- lapply(L[-n], function(l) Rssa::new.hbhmat(Im(hn), c(l, 1)))
       unfolds_i[[n]] <- Rssa::new.hbhmat(Im(hlast), c(L[n], 1))
     } else {
       unfolds_i <- lapply(L, FUN = Rssa::new.hmat, F = Im(F))
@@ -212,13 +212,13 @@ reconstruct.tssa <- function(x, groups, ...,
   N <- x$length
   
   u_fft <- .get.or.create(x, "tssa.u.fft", 
-                          lapply(1:num_modes, \(m) mvfft(.mvpad0(U[[m]], N))))
+                             lapply(1:num_modes, function(m) mvfft(.mvpad0(U[[m]], N))))
   
   w <- 1 / .hweights(x) / N
   res <- numeric(prod(x$length));
   for (i in idx) {
     new <- w * do.call(`[`, c(list(Z), as.list(i))) * 
-          .hankelize.one.tssa(x, i, u_fft, complex_result = is.complex(.F))
+          .hankelize.one.tssa(x, i, u_fft, complex_result = is.complex(.F(x)))
     if (cache) .set.series(x, new, list(i))
     res <- res + new
   }
@@ -227,7 +227,7 @@ reconstruct.tssa <- function(x, groups, ...,
 }
 
 .hankelize.one.tssa <- function(x, idx, u_fft, complex_result = FALSE) {
-  res <- fft(Reduce(`*`, lapply(seq_along(u_fft), \(j) u_fft[[j]][, idx[j]])), inverse = TRUE)
+  res <- fft(Reduce(`*`, lapply(seq_along(u_fft), function(j) u_fft[[j]][, idx[j]])), inverse = TRUE)
   if (complex_result) res else Re(res)
 }
 
@@ -260,13 +260,13 @@ contributions.tssa <- function(x, idx = sapply(nsigma(x), seq_len)) {
   sigma <- .sigma(x)
   wn2 <- wnorm(x)^2
   
-  lapply(seq_len(num_modes), \(m) sigma[[m]][idx[[m]]]^2 / wn2)
+  lapply(seq_len(num_modes), function(m) sigma[[m]][idx[[m]]]^2 / wn2)
 }
 
 .colspan.tssa <- function(x, idx, modes = NULL) {
   U <- .U(x)
   if (is.null(modes)) modes <- seq_along(U)
-  if (length(modes) == 1) U[[modes]][, idx, drop = FALSE] else lapply(U[modes], \(u) u[, idx, drop = FALSE])
+  if (length(modes) == 1) U[[modes]][, idx, drop = FALSE] else lapply(U[modes], function(u) u[, idx, drop = FALSE])
 }
 
 .V.tssa <- function(x) {

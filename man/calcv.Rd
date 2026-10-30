@@ -2,6 +2,7 @@
 \alias{calc.v}
 \alias{calc.v.ssa}
 \alias{calc.v.cssa}
+\alias{calc.v.tssa}
 
 \title{Calculate Factor Vector(s)}
 
@@ -13,6 +14,7 @@
 \usage{
 \method{calc.v}{ssa}(x, idx, \dots)
 \method{calc.v}{cssa}(x, idx, \dots)
+\method{calc.v}{tssa}(x, \dots)
 }
 
 \arguments{
@@ -31,6 +33,9 @@
   }
   where X is a Hankel trajectory matrix, U is the matrix of eigenvectors
   and Sigma is a matrix of singular values.
+  
+  In Tensor SSA there are only n-mode eigenvectors U, so this function 
+  does not make any sense in this context. Throws a warning and returns `x`.
 }
 
 \value{

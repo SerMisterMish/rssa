@@ -177,5 +177,6 @@ importFrom("stats", "approxfun", "as.dist", "as.formula", "cov2cor",
            "cutree", "fft", "filter", "frequency", "hclust", "is.ts",
            "mad", "median", "mvfft", "poly", "predict", "quantile",
            "residuals", "time", "toeplitz", "ts", "ts.union", "tsp<-")
-importFrom("utils", "head", "modifyList", "object.size", "getS3method")
+importFrom("utils", "head", "tail", "modifyList", "object.size", "getS3method", 
+           "setTxtProgressBar", "getTxtProgressBar")
 importFrom("methods", "new")

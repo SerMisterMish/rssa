@@ -22,8 +22,8 @@
   dots <- list(...)
   
   A <- Reduce(c, sapply(numvalues, seq_len))
-  B <- Reduce(c, sapply(seq_along(numvalues), \(m) x$sigma[[m]][1:numvalues[m]]))
-  mode <- Reduce(c, sapply(seq_along(numvalues), \(m) rep(m, numvalues[m])))
+  B <- Reduce(c, sapply(seq_along(numvalues), function(m) x$sigma[[m]][1:numvalues[m]]))
+  mode <- Reduce(c, sapply(seq_along(numvalues), function(m) rep(m, numvalues[m])))
   d <- data.frame(A = A, B = B, mode = mode)
   
   # Provide convenient defaults
@@ -47,7 +47,7 @@
     warning(sprintf("Elementary matrices are not F-orthogonal (max F-cor is %s). Contributions can be irrelevant",
                     format(isfcor, digits = 3)))
   
-  lapply(contributions(x, idx), \(cv) round(100 * cv, digits = 2))
+  lapply(contributions(x, idx), function(cv) round(100 * cv, digits = 2))
 }
 
 prepanel.mode.vectors <- function(x, y, ssaobj, mode, symmetric = FALSE) {
@@ -81,9 +81,15 @@ panel.mode.vectors <- function(x, y, ssaobj, mode, ..., ref = FALSE) {
   }
   
   groups <- if (Vcompl || Ucompl) 2 else 1
-  panel.superpose(U, V,
+  dots <- list(...)
+  if ("subscripts" %in% names(dots))
+    panel.superpose(U, V,
                   panel.groups = panel.xyplot,
-                  groups = gl(n = groups, length(V) / groups), ..., subscripts = 1:length(U))
+                  groups = gl(n = groups, length(V) / groups), ...)
+  else
+    panel.superpose(U, V,
+                    panel.groups = panel.xyplot,
+                    groups = gl(n = groups, length(V) / groups), ..., subscripts = seq_along(U))
 }
 
 .plot.ssa.vectors.tssa <- function(x, ...,

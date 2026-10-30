@@ -4,6 +4,7 @@
 \alias{decompose.ssa}
 \alias{decompose.cssa}
 \alias{decompose.toeplitz.ssa}
+\alias{decompose.tssa}
 \title{Perform SSA Decomposition}
 
 \description{
@@ -14,6 +15,7 @@
 \method{decompose}{ssa}(x, neig = NULL, \dots, force.continue = FALSE)
 \method{decompose}{toeplitz.ssa}(x, neig = NULL, \dots, force.continue = FALSE)
 \method{decompose}{cssa}(x, neig = NULL, \dots, force.continue = FALSE)
+\method{decompose}{tssa}(x, neig = NULL, \dots, force.continue = FALSE)
 }
 
 \arguments{
@@ -26,7 +28,8 @@
 \details{
   This is the main function which does the decomposition of the SSA
   trajectory matrix. Depending on the SVD method selected in the
-  \code{\link{ssa}} different SVD implementations are called. This
+  \code{\link{ssa}} (and tensor decomposition for Tensor SSA)
+  different SVD implementations are called. This
   might be the ordinary full SVD routines or fast methods which exploit
   the Hankel / Toeplitz / Hankel with Hankel blocks matrix structure and
   allow the calculation of first few eigentriples.

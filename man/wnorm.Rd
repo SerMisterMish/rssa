@@ -4,6 +4,7 @@
 \alias{wnorm.nd.ssa}
 \alias{wnorm.toeplitz.ssa}
 \alias{wnorm.mssa}
+\alias{wnorm.tssa}
 \alias{wnorm.default}
 \alias{wnorm.complex}
 
@@ -16,6 +17,7 @@
 \method{wnorm}{nd.ssa}(x, ...)
 \method{wnorm}{toeplitz.ssa}(x, ...)
 \method{wnorm}{mssa}(x, ...)
+\method{wnorm}{tssa}(x, ...)
 \method{wnorm}{default}(x, L = (N + 1) \%/\% 2, ...)
 \method{wnorm}{complex}(x, L = (N + 1) \%/\% 2, ...)
 }
@@ -29,11 +31,11 @@
 
 \details{
   \code{L}-weighted norm of series is Frobenius norm of its
-  \code{L}-trajectory matrix. So, if \code{x} is vector (series), the
-  result of \code{wnorm(x, L)} is equal to \code{sqrt(sum(hankel(x,
-  L)^2)}, but in fact is calculated much more efficiently. For 1d SSA and
-  Toeplitz SSA \code{wnorm(x)} calculates weighted norm for stored
-  original input series and stored window length.
+  \code{L}-trajectory matrix (or tensor for TSSA).
+  So, if \code{x} is vector (series), the result of \code{wnorm(x, L)}
+  is equal to \code{sqrt(sum(hankel(x, L)^2)}, but in fact is calculated
+  much more efficiently. For 1d SSA and Toeplitz SSA \code{wnorm(x)} calculates
+  weighted norm for stored original input series and stored window length.
 
   \code{L}-weighted norm of 2d array is Frobenius norm of its \code{L[1]
   * L[2]}-trajectory hankel-block-hankel matrix.  For 2d SSA this method

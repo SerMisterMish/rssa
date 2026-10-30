@@ -1,6 +1,7 @@
 \name{reconstruct}
 \alias{reconstruct}
 \alias{reconstruct.ssa}
+\alias{reconstruct.tssa}
 \title{Perform a series reconstruction}
 
 \description{
@@ -10,6 +11,7 @@
 
 \usage{
 \method{reconstruct}{ssa}(x, groups, \dots, drop.attributes = FALSE, cache = TRUE)
+\method{reconstruct}{tssa}(x, groups, \dots, drop.attributes = FALSE, cache = TRUE)
 }
 
 \arguments{

@@ -18,11 +18,12 @@ ssa(x,
     column.oblique = "identity",
     row.oblique = "identity",
     \dots,
-    kind = c("1d-ssa", "2d-ssa", "nd-ssa", "toeplitz-ssa", "mssa", "cssa"),
+    kind = c("1d-ssa", "2d-ssa", "nd-ssa", "toeplitz-ssa", "mssa", "cssa", "tssa"),
     circular = FALSE,
     svd.method = c("auto", "nutrlan", "propack", "svd", "eigen", 
                    "rspectra", "primme", "irlba", "rsvd"),
-    force.decompose = TRUE)
+    force.decompose = TRUE,
+    tensor.decomposition = c("hutd", "hutd+hooi", "hosvd", "hooi"))
 }
 
 \arguments{
@@ -39,8 +40,8 @@ ssa(x,
     See `Details' for more information about the window shape selection}
   \item{\dots}{further arguments passed to \code{\link[Rssa:decompose.ssa]{decompose}} }
   \item{kind}{SSA method. This includes ordinary 1d SSA, 2d SSA,
-    Toeplitz variant of 1d SSA, multichannel variant of SSA and complex
-    SSA}
+    Toeplitz variant of 1d SSA, multichannel variant of SSA, complex
+    SSA and Tensor SSA}
   \item{circular}{logical vector of one or two elements, describes series topology for
     1d SSA and Toeplitz SSA or field topology for 2d SSA. 'TRUE' means
     series circularity for 1d case or circularity by a corresponding
@@ -53,7 +54,8 @@ ssa(x,
   \item{column.oblique, row.oblique}{column and row matrix weights for 
   Weighted Oblique SSA. See `Details' for information about how to use this feature}
   \item{force.decompose}{logical, if 'TRUE' then the decomposition is
-    performed before return.}
+    performed before return.}\
+  \item{tensor.decomposition}{Which tensor decomposition to use when performing Tensor SSA}
 }
 
 \value{
@@ -87,6 +89,7 @@ ssa(x,
       \item{2d-ssa}{2d SSA for decomposition of images and arrays. See
         Golyandina and Usevich (2009) and Golyandina et.al (2015) for more information.}
       \item{nd-ssa}{Multidimensional SSA decomposition for arrays (tensors).}
+      \item{tssa}{1d SSA that uses trajectory tensor and tensor decomposition.}
     }
   }
 

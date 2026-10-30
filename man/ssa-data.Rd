@@ -17,7 +17,7 @@
   scales for forecasted objects as well.
 
   The input formats are as follows:
-  \subsection{1d SSA and Toeplitz SSA}{
+  \subsection{1d SSA, Toeplitz SSA and Tensor SSA}{
     Input is assumed to be a simple vector, or vector-like object
     (e.g. univariare 'ts' or 'zooreg' object). Everything else is
     coerced to vector.

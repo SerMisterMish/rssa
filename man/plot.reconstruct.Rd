@@ -6,6 +6,7 @@
 \alias{plot.mssa.reconstruction}
 \alias{plot.2d.ssa.reconstruction}
 \alias{plot.nd.ssa.reconstruction}
+\alias{plot.tssa.reconstruction}
 
 \title{Plot the results of SSA reconstruction}
 \description{
@@ -19,6 +20,12 @@
      add.original = TRUE,
      add.residuals = TRUE)
 \method{plot}{toeplitz.ssa.reconstruction}(x, \dots,
+     type = c("raw", "cumsum"),
+     plot.method = c("native", "matplot", "xyplot"),
+     base.series = NULL,
+     add.original = TRUE,
+     add.residuals = TRUE)
+\method{plot}{tssa.reconstruction}(x, \dots,
      type = c("raw", "cumsum"),
      plot.method = c("native", "matplot", "xyplot"),
      base.series = NULL,

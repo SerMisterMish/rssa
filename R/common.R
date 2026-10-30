@@ -330,6 +330,8 @@ wnorm <- function(x, ...)
   UseMethod("wnorm")
 nspecial <- function(x)
   UseMethod("nspecial")
+contributions <- function(x, idx)
+  UseMethod("contributions")
 
 .hankelize.one <- function(x, ...)
   UseMethod(".hankelize.one")

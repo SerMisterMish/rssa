@@ -139,8 +139,12 @@ nv(x)
 }
 
 \value{
-  an 'integer' of length 1 for \code{nu}, \code{nv}, \code{nsigma},
-  \code{nspecial} routines, matrix or vector for \code{$} operator.
+  For non-tensor variants an 'integer' of length 1 for \code{nu}, \code{nv}, 
+  \code{nsigma}, \code{nspecial} routines, matrix or vector for \code{$} operator.
+  
+  For Tensor SSA \code{x$sigma} and \code{x$U} return lists with corresponding 
+  matrices or vectors for each mode, \code{nsigma} and \code{nu} return 'integer'
+  vectors of their correspongind lengths, \code{x$V} returns 'NULL', \code{nv} returns 0.
 }
 
 \note{

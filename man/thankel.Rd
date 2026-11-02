@@ -16,7 +16,8 @@ new.unfolds(F, L, rm.repeated = TRUE)
 
 \arguments{
   \item{F}{series to construct the trajectory tensor and its unfolds for.}
-  \item{L}{the window length, resulting tensor will have `length(L) + 1` modes.}
+  \item{L}{modes of the resulting tensor, 
+  \code{length(F) == sum(L) - length(L) + 1} must be true}
   \item{rm.repeated}{logical, whether to remove repeating columns in the 
   unfoldings. HOSVD on unfoldings with removed such columns results in HUTD.}
 }
